@@ -6,8 +6,8 @@ public class TestModel {
 
     private int weight;
 
-    public TestModel(int weight){
-        this.weight=weight;
+    public TestModel(int weight) {
+        this.weight = weight;
     }
 
     public TestModel() {

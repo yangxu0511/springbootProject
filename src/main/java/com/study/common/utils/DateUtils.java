@@ -11,8 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- *@author yangxu
- *@create 2024/3/26 9:54
+ * @author yangxu
+ * @create 2024/3/26 9:54
  */
 public class DateUtils {
 
@@ -22,6 +22,7 @@ public class DateUtils {
         Date currentDate = new Date();
         return dateFormat.format(currentDate);
     }
+
     /**
      * @Author yangxu
      * @Description 获取昨天的日期

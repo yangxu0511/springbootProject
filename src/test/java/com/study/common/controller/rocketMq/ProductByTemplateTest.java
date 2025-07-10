@@ -14,15 +14,15 @@ class ProductByTemplateTest {
         ProductByTemplate template = new ProductByTemplate(new RocketMQTemplate());
         JSONObject object = new JSONObject();
         JSONObject data = new JSONObject();
-        data.put("phone","18842824295");
-        data.put("messageId","8888");
-        data.put("sessionId","12345678");
-        data.put("content","112");
-        object.put("data",data);
-        object.put("prcscd","msgcet");
-        object.put("messageId","8888");
-        object.put("service","esb");
-        object.put("sessionId","local");
-        template.sendMessage("myTopic",object);
+        data.put("phone", "18842824295");
+        data.put("messageId", "8888");
+        data.put("sessionId", "12345678");
+        data.put("content", "112");
+        object.put("data", data);
+        object.put("prcscd", "msgcet");
+        object.put("messageId", "8888");
+        object.put("service", "esb");
+        object.put("sessionId", "local");
+        template.sendMessage("myTopic", object);
     }
 }

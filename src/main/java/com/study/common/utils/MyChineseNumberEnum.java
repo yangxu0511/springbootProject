@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *@author yangxu
- *@create 2024/3/26 9:55
+ * @author yangxu
+ * @create 2024/3/26 9:55
  */
 enum MyChineseNumberEnum {
 

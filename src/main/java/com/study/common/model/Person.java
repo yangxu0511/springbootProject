@@ -38,7 +38,7 @@ public class Person {
 //    @Pattern    验证 String 对象是否符合正则表达式的规则
 
 
-   // @Value("${name}") 使用.properties要用Sp el表达式取出来赋值
+    // @Value("${name}") 使用.properties要用Sp el表达式取出来赋值
     @Email(message = "邮箱格式错误")
     private String name;
     // @Value("${age}")
@@ -51,6 +51,7 @@ public class Person {
 
     public Person() {
     }
+
     public Person(String name, Integer age, Boolean happy, Date birth, Map<String, Object> maps, List<Object> lists, Dog dog) {
         this.name = name;
         this.age = age;
@@ -120,7 +121,7 @@ public class Person {
     @Override
     public String toString() {
         return "Person{" +
-                "name='" + name  +
+                "name='" + name +
                 ", age=" + age +
                 ", happy=" + happy +
                 ", birth=" + birth +

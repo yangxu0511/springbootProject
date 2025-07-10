@@ -11,7 +11,7 @@ public class ApplicationTest {
     private Person person;
 
     @Test
-    public void testProperties(){
+    public void testProperties() {
         System.out.println(person);
 
     }

@@ -24,14 +24,34 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *@author yangxu
- *@create 2024/1/16 16:15
+ * @author yangxu
+ * @create 2024/1/16 16:15
  */
 public class TestMain {
     public TestMain() throws IOException {
     }
 
     public static void main(String[] args) throws Exception {
+
+        String reports = "JT5";
+        if (reports.contains("1") || reports.contains("2") || reports.contains("3") || reports.contains("5")) {
+            System.out.println("通过");
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1); // 设置为本月第一天
+        Date firstDay = calendar.getTime();
+
+        // 获取当前月份的最后一天
+        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        Date lastDay = calendar.getTime();
+
+        System.out.println(firstDay+","+lastDay);
+
+        String acd = "a|b";
+        System.out.println(acd.split("\\|").length);
+
 
         String dateIdss = "20250122";
         String fileName = "JS2-20250122-result.zip";
@@ -43,11 +63,12 @@ public class TestMain {
 
         if (!fileName.endsWith(endsWith) || !fileName.startsWith(startWith)) {
             System.out.println("不满足===");
-        }else{
+        } else {
             System.out.println("满足==");
         }
 
-        String feeName = " XX套餐(国内) (香港)   资费  ";
+        String feeName = "    【省】校园基础权益卡\n" +
+                "（AI智慧体育）   ";
         String formattedFeeName = formatFeeName(feeName);
         System.out.println(formattedFeeName);  // 输出: XX套餐（国内）（香港）资费
 
@@ -73,7 +94,7 @@ public class TestMain {
         jsonObject.put("MIN_DATE", date);
         jsonObject.put("ALLTOTAL", allTotal);
 
-        System.out.println("dateId="+jsonObject.containsKey("date_id")+",DATE_ID="+jsonObject.containsKey("DATE_ID"));
+        System.out.println("dateId=" + jsonObject.containsKey("date_id") + ",DATE_ID=" + jsonObject.containsKey("DATE_ID"));
 
         // 创建 JSON 对象
         JSONObject jsonObject2 = new JSONObject();
@@ -155,7 +176,7 @@ public class TestMain {
             }
         }
 
-        for(JSONObject obj : result){
+        for (JSONObject obj : result) {
             System.out.println(obj.toJSONString());
         }
 
@@ -174,13 +195,12 @@ public class TestMain {
     }
 
     public static String formatFeeName(String feeName) {
-        // 将英文括号替换为中文括号
-        String formattedName = feeName.replace("(", "（").replace(")", "）");
+        return feeName
+                .replace("\r", "")   // 移除回车符
+                .replace("\n", "")   // 移除换行符
+                .replace("（", "(")   // 中文左括号转英文
+                .replace("）", ")").trim();  // 中文右括号转英文
 
-        // 去掉所有空格（包括中间空格和首尾空格）
-        formattedName = formattedName.replaceAll("\\s+", "");
-
-        return formattedName;
     }
 
 }

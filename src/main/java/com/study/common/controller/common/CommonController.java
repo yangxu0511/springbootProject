@@ -21,8 +21,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Controller("/common")
-public class CommonController
-{
+public class CommonController {
 
 
 //    /**
@@ -178,8 +177,6 @@ public class CommonController
         String pattern = "^\\s*\\(\\s*[a-zA-Z]+\\s*(?:[+\\-*/]\\s*[a-zA-Z]+\\s*)*\\)\\s*/\\s*[a-zA-Z]+\\s*$";
         return Pattern.matches(pattern, expression);
     }
-
-
 
 
 }

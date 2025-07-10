@@ -21,8 +21,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- *@author yangxu
- *@create 2024/4/24 11:27
+ * @author yangxu
+ * @create 2024/4/24 11:27
  */
 public class WriteNum extends AppBaseNum {
     private static final Logger logger = Logger.getLogger(WriteNum.class.getName());
@@ -59,9 +59,9 @@ public class WriteNum extends AppBaseNum {
 
     private static void writeNumberToFile(String number, String date, String filePath, String fileType) {
         File file = new File(filePath);
-        JSONObject jsonObject = file.exists() ? 
-            updateExistingJson(file, date, number) : 
-            createNewJson(date, number);
+        JSONObject jsonObject = file.exists() ?
+                updateExistingJson(file, date, number) :
+                createNewJson(date, number);
 
         try (FileWriter fileWriter = new FileWriter(filePath)) {
             fileWriter.write(jsonObject.toJSONString());
@@ -106,17 +106,17 @@ public class WriteNum extends AppBaseNum {
      */
     public static void sortJson() {
         List<String> paths = Arrays.asList(
-            Constants.getHisFilePath(),
-            Constants.getTcFilePath(),
-            Constants.getFcFilePath(),
-            Constants.getNotBuyPath()
+                Constants.getHisFilePath(),
+                Constants.getTcFilePath(),
+                Constants.getFcFilePath(),
+                Constants.getNotBuyPath()
         );
 
         List<String> outPaths = Arrays.asList(
-            Constants.getHisOutFilePath(),
-            Constants.getTcFileOutPath(),
-            Constants.getFcFileOutPath(),
-            Constants.getNotBuyOutPath()
+                Constants.getHisOutFilePath(),
+                Constants.getTcFileOutPath(),
+                Constants.getFcFileOutPath(),
+                Constants.getNotBuyOutPath()
         );
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -130,11 +130,12 @@ public class WriteNum extends AppBaseNum {
 
     private static void sortAndRenameFile(String inputPath, String outputPath, SimpleDateFormat sdf, String todayDate) {
         try (FileReader reader = new FileReader(inputPath)) {
-            Type mapType = new TypeToken<Map<String, String>>() {}.getType();
+            Type mapType = new TypeToken<Map<String, String>>() {
+            }.getType();
             Map<String, String> data = gson.fromJson(reader, mapType);
 
             Map<String, String> sortedData = sortMapByDate(data, sdf);
-            
+
             try (FileWriter writer = new FileWriter(outputPath)) {
                 gson.toJson(sortedData, writer);
             }
@@ -147,24 +148,24 @@ public class WriteNum extends AppBaseNum {
 
     private static Map<String, String> sortMapByDate(Map<String, String> data, SimpleDateFormat sdf) {
         return data.entrySet().stream()
-            .sorted((e1, e2) -> {
-                try {
-                    return sdf.parse(e2.getKey()).compareTo(sdf.parse(e1.getKey()));
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .collect(LinkedHashMap::new,
-                    (map, entry) -> map.put(entry.getKey(), entry.getValue()),
-                    Map::putAll);
+                .sorted((e1, e2) -> {
+                    try {
+                        return sdf.parse(e2.getKey()).compareTo(sdf.parse(e1.getKey()));
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(LinkedHashMap::new,
+                        (map, entry) -> map.put(entry.getKey(), entry.getValue()),
+                        Map::putAll);
     }
 
     private static void renameFiles(String inputPath, String outputPath, String todayDate) {
         File oriFile = new File(inputPath);
         File outFile = new File(outputPath);
-        
-        File newFile = new File(Constants.getBasePath(), 
-            oriFile.getName().split("\\.")[0] + "_" + todayDate + ".json");
+
+        File newFile = new File(Constants.getBasePath(),
+                oriFile.getName().split("\\.")[0] + "_" + todayDate + ".json");
         File newOutFile = new File(Constants.getBasePath(), oriFile.getName());
 
         if (!oriFile.renameTo(newFile)) {

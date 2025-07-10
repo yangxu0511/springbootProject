@@ -6,8 +6,8 @@ package com.study.common.utils;/**
  */
 
 /**
- *@author yangxu
- *@create 2024/3/26 9:55
+ * @author yangxu
+ * @create 2024/3/26 9:55
  */
 class StringUtils {
     public static boolean isEmpty(String str) {

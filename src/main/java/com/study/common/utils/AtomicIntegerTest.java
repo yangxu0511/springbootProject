@@ -10,9 +10,9 @@ public class AtomicIntegerTest {
 
 
     private static final int THREADS_CONUT = 20;
-   // public static int count = 0;
-  //  public static volatile int count = 0;
-   public static AtomicInteger count = new AtomicInteger(0);
+    // public static int count = 0;
+    //  public static volatile int count = 0;
+    public static AtomicInteger count = new AtomicInteger(0);
     //原子类ABA问题解决方案 java包下两个类可以解决
     //AtomicStampedReference 和 AtomicMarkableReference
     //分配一个pair对象
@@ -20,7 +20,7 @@ public class AtomicIntegerTest {
 
 
     public static void increase() {
-       // count++;
+        // count++;
         count.getAndIncrement();
     }
 

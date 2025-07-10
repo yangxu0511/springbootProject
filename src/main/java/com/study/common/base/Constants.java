@@ -9,34 +9,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *@author yangxu
- *@create 2024/4/24 11:10
+ * @author yangxu
+ * @create 2024/4/24 11:10
  */
 
 public class Constants {
     private static final String basePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources";
     private static final String hisFilePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\history.json";
     private static final String notBuyPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\notBuy.json";
-    private static final String tcFilePath  = "D:\\idea-workspace\\springbootProject\\dlt.json";
-    private static final String tcBakFilePath  = "D:\\idea-workspace\\springbootProject\\dlt_bak.json";
-    private static final String fcFilePath  = "D:\\idea-workspace\\springbootProject\\ssq.json";
-    private static final String fcBakFilePath  = "D:\\idea-workspace\\springbootProject\\ssq_bak.json";
+    private static final String tcFilePath = "D:\\idea-workspace\\springbootProject\\dlt.json";
+    private static final String tcBakFilePath = "D:\\idea-workspace\\springbootProject\\dlt_bak.json";
+    private static final String fcFilePath = "D:\\idea-workspace\\springbootProject\\ssq.json";
+    private static final String fcBakFilePath = "D:\\idea-workspace\\springbootProject\\ssq_bak.json";
 
     private static final String hisOutFilePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\history_sort.json";
     private static final String notBuyOutPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\notBuy_sort.json";
-    private static final String tcFileOutPath  = "D:\\idea-workspace\\springbootProject\\\\dlt_sort.json";
-    private static final String fcFileOutPath  = "D:\\idea-workspace\\springbootProject\\ssq_sort.json";
-
+    private static final String tcFileOutPath = "D:\\idea-workspace\\springbootProject\\\\dlt_sort.json";
+    private static final String fcFileOutPath = "D:\\idea-workspace\\springbootProject\\ssq_sort.json";
 
 
     public static final String pythonScriptPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\zj.py";
-    public static final String pythonexe = "C:\\Program Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\\python3.10.exe";
+    public static final String pythonexe = "C:\\Users\\yangxu\\AppData\\Local\\Programs\\Python\\Python38\\python.exe";
     public static final String ifRunPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\runPython.json";
     public static final int similarSize = 5; //定义相似度个数
     public static final int sameRedSize = 4; //定义红球命中个数
-    public static final int sameHisSize = 3; //历史命中数
+    public static final int sameHisSize = 4; //历史命中数
     private static final Map<String, String> tcMap = new HashMap<>();
     private static final Map<String, String> fcMap = new HashMap<>();
+
     static {
         tcMap.put("5-2", "恭喜你成为百万富翁……历史性的一刻！！！中奖金额>=500万");
         tcMap.put("5-1", "恭喜中了二等奖 卸下了很大一部分负担！奖金≈30万");
@@ -63,6 +63,7 @@ public class Constants {
         fcMap.put("1-1", "恭喜中了六等奖 买一张刮刮乐吧！奖金=5");
         fcMap.put("0-1", "恭喜中了六等奖 买一张刮刮乐吧！奖金=5");
     }
+
     public static Map<String, String> getTcMap() {
         return tcMap;
     }
@@ -74,33 +75,43 @@ public class Constants {
     public static String getBasePath() {
         return basePath;
     }
+
     public static String getHisFilePath() {
         return hisFilePath;
     }
+
     public static String getTcFilePath() {
         return tcFilePath;
     }
+
     public static String getTcBakFilePath() {
         return tcBakFilePath;
     }
+
     public static String getFcFilePath() {
         return fcFilePath;
     }
+
     public static String getFcBakFilePath() {
         return fcBakFilePath;
     }
+
     public static String getNotBuyPath() {
         return notBuyPath;
     }
+
     public static String getHisOutFilePath() {
         return hisOutFilePath;
     }
+
     public static String getTcFileOutPath() {
         return tcFileOutPath;
     }
+
     public static String getFcFileOutPath() {
         return fcFileOutPath;
     }
+
     public static String getNotBuyOutPath() {
         return notBuyOutPath;
     }
