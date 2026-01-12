@@ -1,0 +1,2 @@
+2025-11-17 17:16:28	INFO	[easitline-jdbc:easitline-jdbc]	[52ms] select * from  EASI_CONF ,params[{}] - com.yq.busi.common.base.CommonCoreLogger.getLogger(CommonCoreLogger.java:13) 	 at org.easitline.common.db.SqlHelper.timeoutLogOut(SqlHelper.java:82)	
+2025-11-17 17:17:47	INFO	[easitline-jdbc:easitline-jdbc]	[36ms] select * from  EASI_CONF ,params[{}] - com.yq.busi.common.base.CommonCoreLogger.getLogger(CommonCoreLogger.java:13) 	 at org.easitline.common.db.SqlHelper.timeoutLogOut(SqlHelper.java:82)	
