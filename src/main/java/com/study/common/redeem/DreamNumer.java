@@ -4,262 +4,117 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.study.common.base.AppBaseNum;
 import com.study.common.base.Constants;
+import com.study.common.redeem.LotteryAnalyzer.FilterRule;
+import com.study.common.redeem.LotteryAnalyzer.LotteryType;
+import com.study.common.redeem.LotteryAnalyzer.ValidationResult;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * 彩票号码生成器
+ * 支持智能筛选：奇偶比、大小号比例、冷热号、跨度、和值、连号等规则
+ * 
+ * @author yangxu
+ * @since 2023-10-26
+ * @update 2026-01-12 添加智能筛选功能
  */
 public class DreamNumer extends AppBaseNum {
 
     private static final Random RANDOM = new Random();
-    private static final Set<Integer> redSet = new HashSet<>();
-    private static final Set<Integer> blueSet = new HashSet<>();
 
     /**
-     * 彩票类型配置
+     * 根据当前日期自动判断彩票类型并生成号码
      */
-    private enum LotteryType {
-        TC("tc", 35, 12, 5, 2), // 大乐透: 1-35选5 + 1-12选2
-        FC("fc", 33, 16, 6, 1); // 双色球: 1-33选6 + 1-16选1
-
-        private final String code;        // 彩票代码
-        private final int maxRed;         // 红球最大值
-        private final int maxBlue;        // 蓝球最大值
-        private final int redCount;       // 需要选择的红球数量
-        private final int blueCount;      // 需要选择的蓝球数量
-
-        LotteryType(String code, int maxRed, int maxBlue, int redCount, int blueCount) {
-            this.code = code;
-            this.maxRed = maxRed;
-            this.maxBlue = maxBlue;
-            this.redCount = redCount;
-            this.blueCount = blueCount;
-        }
-
-        static LotteryType fromCode(String code) {
-            return Arrays.stream(values())
-                    .filter(type -> type.code.equals(code))
-                    .findFirst()
-                    .orElse(null);
-        }
-    }
-
-    //1-35 1-12 1 3 6 5+2 大乐透
-    //1-33 1-16 2 4 7 6+1 双色球
     public static void getDreamNum() {
         String zjType = getZjType();
+        if (StrUtil.isEmpty(zjType)) {
+            System.out.println("今天不是开奖日！");
+            return;
+        }
         getDreamNum(zjType);
     }
 
-    //1-35 1-12 1 3 6 5+2 大乐透
-    //1-33 1-16 2 4 7 6+1 双色球
-    public static void getDreamNum(String zjType) {
-        redSet.clear();
-        blueSet.clear();
-        if (StrUtil.isNotEmpty(zjType)) {
-            if ("tc".equals(zjType)) {
-                tcDays();
-            } else if ("fc".equals(zjType)) {
-                fcDays();
-            } else {
-                System.out.println("无效类型！");
-                return;
-            }
-        }
-        filterData(zjType);
-    }
-
-    private static String getZjType() {
-        Calendar calendar = Calendar.getInstance();
-        String zjType = "";
-        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-        if (currentDay == 1 || currentDay == 3 || currentDay == 5 || currentDay == 6) {
-            tcDays();
-            zjType = "tc";
-        }
-        if (currentDay == 2 || currentDay == 4 || currentDay == 0) {
-            fcDays();
-            zjType = "fc";
-        }
-        return zjType;
-    }
-
     /**
-     * @param zjType 中奖的开奖类型
-     * @Author yangx
-     * @Description 筛选历史中奖信息
-     * @Since create in 2023年10月26日
-     * @Company 广州云趣信息科技有限公司
+     * 指定类型生成号码
+     * @param zjType tc=大乐透, fc=双色球
      */
-    private static void filterData(String zjType) {
-        String jsonFilePath;
-        int redSize;
-        int blueSize;
-        if ("tc".equals(zjType)) {
-            jsonFilePath = Constants.getTcFilePath();
-            redSize = 5;
-            blueSize = 2;
-        } else if ("fc".equals(zjType)) {
-            jsonFilePath = Constants.getFcFilePath();
-            redSize = 6;
-            blueSize = 1;
-        } else {
-            System.out.println("无效类型！");
+    public static void getDreamNum(String zjType) {
+        LotteryType type = LotteryType.fromCode(zjType);
+        if (type == null) {
+            System.out.println("无效类型！请使用 tc(大乐透) 或 fc(双色球)");
             return;
         }
-        TreeSet<Integer> set = new TreeSet<>(new Comparator<Integer>() {
-            @Override
-            public int compare(Integer t1, Integer t2) {
-                //t1.compareTo(t2)  是从小到大正序排序,同理t2 . t1 就是倒序排序;
-                return t1.compareTo(t2);
-            }
-        });
-        set.addAll(redSet);
-        String zjNum = "";
-        zjNum = set.stream()
-                .map(num -> {
-                    return (num < 10) ? "0" + num : String.valueOf(num);
-                })
-                .collect(Collectors.joining("|"));
-        set.clear();
-        set.addAll(blueSet);
-        zjNum = zjNum + "|" + set.stream()
-                .map(num -> {
-                    return (num < 10) ? "0" + num : String.valueOf(num);
-                })
-                .collect(Collectors.joining("|"));
-        try {
-            JSONObject historyData = filterJson(jsonFilePath);
-            boolean isExist = false;
-            for (String key : historyData.keySet()) {
-                if (zjNum.equals(historyData.get(key))) {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (isExist) {
-                System.out.println("号码跟中奖重复啦，晚生成一步，我重新生成一个新的中奖号码 ^^ " + zjNum);
-                getDreamNum(zjType);
-            } else {
-                set.clear();
-                set.addAll(redSet);
-                zjNum = set.stream()
-                        .map(num -> {
-                            return (num < 10) ? "0" + num : String.valueOf(num);
-                        })
-                        .collect(Collectors.joining(","));
-                set.clear();
-                set.addAll(blueSet);
-                int index = 0;
-                Iterator<Integer> blueIt2 = set.iterator();
-                while (blueIt2.hasNext()) {
-                    Integer num = blueIt2.next();
-                    String txt = "";
-                    if (num < 10) {
-                        txt = "0" + num;
-                    } else {
-                        txt = num + "";
-                    }
-                    if (index == 0) {
-                        zjNum = zjNum + " " + txt;
-                    } else {
-                        zjNum = zjNum + "," + txt;
-                    }
-                    index++;
-                }
-            }
 
-            String a_redNum = zjNum.split("\\s")[0];
-            String a_blueNum = zjNum.split("\\s")[1];
-            // 从第一个字符串中提取数字
-            List<Integer> a_redArr = Arrays.stream(a_redNum.split(","))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
+        // 打印分析报告
+        LotteryAnalyzer.printAnalysisReport(zjType);
 
-            List<Integer> a_blueArr = Arrays.stream(a_blueNum.split(","))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
+        // 生成符合筛选规则的号码
+        Set<Integer> redNumbers = generateSmartRedNumbers(type);
+        Set<Integer> blueNumbers = generateNumbers(1, type.maxBlue, type.blueCount);
 
-            System.out.println("今晚的中奖号码历史未出现 请查收您的一千万中奖号码^^ " + zjNum);
-            //现在开始执行比对生成的号码在历史中奖信息中相似度
-            Map<String, String> similarNumber = comparisonNum(a_redArr, a_blueArr, redSize, blueSize, historyData);
-            if (!similarNumber.isEmpty()) {
-                similarNumber.forEach((key, value) -> {
-                    System.out.println("存在相似个数: " + key + ", 号码: " + value);
-                });
-                System.out.print("请在控制台输入yes/y(需要）或no/n(不需要）来确定是否需要这注号码：");
-                boolean validInput = false;
-                Scanner scanner = new Scanner(System.in);
+        // 打印筛选信息
+        printFilterInfo(redNumbers, zjType);
 
-                while (!validInput) {
-                    String input = scanner.nextLine();
-                    if ("no".equals(input) || "n".equals(input) || "N".equals(input) || "不需要".equals(input)) {
-                        System.out.println("您输入了no，重新生成号码...");
-                        WriteNum.writeNotBuyNumber(zjNum);
-                        getDreamNum(zjType);
-                        validInput = true; // 输入有效，退出循环
-                    } else if ("yes".equals(input) || "y".equals(input) || "Y".equals(input) || "需要".equals(input)) {
-                        System.out.println("您输入了yes，不再重新生成号码...");
-                        // 把号码写入历史文件
-                        WriteNum.writeMyNumber(zjNum);
-                        comparisonOpenNum(a_redArr, a_blueArr, redSize, blueSize, historyData);
-                        validInput = true; // 输入有效，退出循环
-                    } else {
-                        System.out.println("输入无效，请重新输入！");
-                        // 继续循环等待有效输入
-                    }
-                }
-            } else {
-                WriteNum.writeMyNumber(zjNum);
-                comparisonOpenNum(a_redArr, a_blueArr, redSize, blueSize, historyData);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("系统崩溃了……" + e.getMessage());
-        }
+        // 处理生成的号码
+        processGeneratedNumbers(redNumbers, blueNumbers, type);
     }
 
     /**
-     * 大乐透
+     * 获取当前日期对应的彩票类型
      */
-    private static void tcDays() {
-        while (redSet.size() == 5 ? false : true) {
-            int num = RANDOM.nextInt(36); ////1-35 1-12 1 3 6 5+2 大乐透
-            if (num == 0) {
-                continue;
-            }
-            redSet.add(num);
+    private static String getZjType() {
+        Calendar calendar = Calendar.getInstance();
+        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        
+        // 大乐透: 周一(1)、周三(3)、周五(5)、周六(6)
+        if (currentDay == 1 || currentDay == 3 || currentDay == 5 || currentDay == 6) {
+            return "tc";
         }
-        while (blueSet.size() == 2 ? false : true) {
-            int num = RANDOM.nextInt(13);
-            if (num == 0) {
-                continue;
-            }
-            blueSet.add(num);
+        // 双色球: 周二(2)、周四(4)、周日(0)
+        if (currentDay == 2 || currentDay == 4 || currentDay == 0) {
+            return "fc";
         }
+        return "";
+    }
 
+    // ==================== 智能号码生成 ====================
+
+    /**
+     * 生成符合筛选规则的红球号码
+     */
+    private static Set<Integer> generateSmartRedNumbers(LotteryType type) {
+        Set<FilterRule> enabledRules = getEnabledFilterRules();
+        
+        for (int retry = 0; retry < Constants.MAX_RETRY_COUNT; retry++) {
+            Set<Integer> numbers = generateNumbers(1, type.maxRed, type.redCount);
+            ValidationResult result = LotteryAnalyzer.validateNumbers(numbers, type.code, enabledRules);
+            
+            if (result.isValid()) {
+                if (retry > 0) {
+                    System.out.println("经过 " + (retry + 1) + " 次筛选，生成符合规则的号码");
+                }
+                return numbers;
+            }
+        }
+        
+        // 超过重试次数，返回最后一次生成的号码（并给出提示）
+        System.out.println("⚠️ 警告: 达到最大重试次数(" + Constants.MAX_RETRY_COUNT + ")，使用当前号码");
+        return generateNumbers(1, type.maxRed, type.redCount);
     }
 
     /**
-     * 双色球
+     * 获取已启用的筛选规则
      */
-    private static void fcDays() {
-        while (redSet.size() == 6 ? false : true) {//1-33 1-16 2 4 7 6+1 双色球
-            int num = RANDOM.nextInt(34);
-            if (num == 0) {
-                continue;
-            }
-            redSet.add(num);
-        }
-        while (blueSet.size() == 1 ? false : true) {
-            int num = RANDOM.nextInt(17);
-            if (num == 0) {
-                continue;
-            }
-            blueSet.add(num);
-        }
+    private static Set<FilterRule> getEnabledFilterRules() {
+        Set<FilterRule> rules = new HashSet<>();
+        if (Constants.ENABLE_ODD_EVEN_FILTER) rules.add(FilterRule.ODD_EVEN);
+        if (Constants.ENABLE_BIG_SMALL_FILTER) rules.add(FilterRule.BIG_SMALL);
+        if (Constants.ENABLE_HOT_COLD_FILTER) rules.add(FilterRule.HOT_COLD);
+        if (Constants.ENABLE_SPAN_FILTER) rules.add(FilterRule.SPAN);
+        if (Constants.ENABLE_SUM_FILTER) rules.add(FilterRule.SUM);
+        if (Constants.ENABLE_CONSECUTIVE_FILTER) rules.add(FilterRule.CONSECUTIVE);
+        return rules;
     }
 
     /**
@@ -275,6 +130,44 @@ public class DreamNumer extends AppBaseNum {
     }
 
     /**
+     * 打印筛选信息
+     */
+    private static void printFilterInfo(Set<Integer> numbers, String lotteryType) {
+        System.out.println("\n【生成号码筛选信息】");
+        
+        // 奇偶比
+        int oddCount = (int) numbers.stream().filter(n -> n % 2 != 0).count();
+        int evenCount = numbers.size() - oddCount;
+        System.out.println("  奇偶比: " + oddCount + ":" + evenCount);
+        
+        // 大小号比例
+        LotteryType type = LotteryType.fromCode(lotteryType);
+        int smallCount = (int) numbers.stream().filter(n -> n <= type.smallMaxNum).count();
+        int bigCount = numbers.size() - smallCount;
+        System.out.println("  大小号比: " + smallCount + ":" + bigCount + " (小号≤" + type.smallMaxNum + ")");
+        
+        // 跨度
+        int span = LotteryAnalyzer.calculateSpan(numbers);
+        System.out.println("  跨度: " + span);
+        
+        // 和值
+        int sum = LotteryAnalyzer.calculateSum(numbers);
+        System.out.println("  和值: " + sum);
+        
+        // 连号组数
+        int consecutive = LotteryAnalyzer.countConsecutiveGroups(numbers);
+        System.out.println("  连号组数: " + consecutive);
+        
+        // 热号命中
+        List<Integer> hotNumbers = LotteryAnalyzer.getHotNumbers(lotteryType, 15);
+        int hotCount = (int) numbers.stream().filter(hotNumbers::contains).count();
+        System.out.println("  热号命中: " + hotCount + "/" + numbers.size() + " (" + 
+                String.format("%.1f", hotCount * 100.0 / numbers.size()) + "%)");
+    }
+
+    // ==================== 号码处理 ====================
+
+    /**
      * 处理生成的号码
      */
     private static void processGeneratedNumbers(Set<Integer> redNumbers, Set<Integer> blueNumbers, LotteryType type) {
@@ -286,12 +179,12 @@ public class DreamNumer extends AppBaseNum {
         try {
             JSONObject historyData = filterJson(jsonFilePath);
             if (isNumberExists(formattedNumbers, historyData)) {
-                System.out.println("号码跟中奖重复啦，晚生成一步，我重新生成一个新的中奖号码 ^^ " + displayNumbers);
+                System.out.println("号码跟历史开奖重复，重新生成... ^^ " + displayNumbers);
                 getDreamNum(type.code);
                 return;
             }
 
-            System.out.println("今晚的中奖号码历史未出现 请查收您的一千万中奖号码^^ " + displayNumbers);
+            System.out.println("\n✨ 今晚的中奖号码历史未出现，请查收您的一千万中奖号码^^ " + displayNumbers);
 
             // 转换号码格式用于比较
             List<Integer> redList = new ArrayList<>(redNumbers);
@@ -305,7 +198,7 @@ public class DreamNumer extends AppBaseNum {
                 similarNumber.forEach((key, value) -> {
                     System.out.println("存在相似个数: " + key + ", 号码: " + value);
                 });
-                handleUserInput(displayNumbers, redList, blueList, type.redCount, type.blueCount, historyData);
+                handleUserInput(displayNumbers, redList, blueList, type.redCount, type.blueCount, historyData, type.code);
             } else {
                 WriteNum.writeMyNumber(displayNumbers);
                 comparisonOpenNum(redList, blueList, type.redCount, type.blueCount, historyData);
@@ -321,7 +214,7 @@ public class DreamNumer extends AppBaseNum {
      * 处理用户输入
      */
     private static void handleUserInput(String numbers, List<Integer> redList, List<Integer> blueList,
-                                        int redSize, int blueSize, JSONObject historyData) {
+                                        int redSize, int blueSize, JSONObject historyData, String lotteryType) {
         System.out.print("请在控制台输入yes/y(需要）或no/n(不需要）来确定是否需要这注号码：");
         Scanner scanner = new Scanner(System.in);
         boolean validInput = false;
@@ -331,7 +224,7 @@ public class DreamNumer extends AppBaseNum {
             if (input.matches("no|n|不需要")) {
                 System.out.println("您输入了no，重新生成号码...");
                 WriteNum.writeNotBuyNumber(numbers);
-                getDreamNum();
+                getDreamNum(lotteryType);
                 validInput = true;
             } else if (input.matches("yes|y|需要")) {
                 System.out.println("您输入了yes，不再重新生成号码...");
@@ -343,6 +236,8 @@ public class DreamNumer extends AppBaseNum {
             }
         }
     }
+
+    // ==================== 格式化工具 ====================
 
     /**
      * 格式化号码用于存储（使用|分隔）
@@ -382,9 +277,12 @@ public class DreamNumer extends AppBaseNum {
      * 检查号码是否存在于历史记录中
      */
     private static boolean isNumberExists(String numbers, JSONObject historyData) {
+        if (historyData == null) return false;
         return historyData.values().stream()
                 .anyMatch(value -> numbers.equals(value.toString()));
     }
+
+    // ==================== 比较方法 ====================
 
     /**
      * 比较号码相似度
@@ -392,6 +290,8 @@ public class DreamNumer extends AppBaseNum {
     public static Map<String, String> comparisonNum(List<Integer> redList, List<Integer> blueList,
                                                     int redSize, int blueSize, JSONObject historyData) {
         Map<String, String> result = new HashMap<>();
+        if (historyData == null) return result;
+
         for (String key : historyData.keySet()) {
             String value = historyData.getString(key);
             String[] parts = value.split("\\|");
@@ -399,7 +299,6 @@ public class DreamNumer extends AppBaseNum {
             List<Integer> historyRed = new ArrayList<>();
             List<Integer> historyBlue = new ArrayList<>();
 
-            // 分离红球和蓝球
             for (int i = 0; i < parts.length; i++) {
                 int num = Integer.parseInt(parts[i]);
                 if (i < redSize) {
@@ -409,16 +308,13 @@ public class DreamNumer extends AppBaseNum {
                 }
             }
 
-            // 计算相同号码数量
             int redMatch = (int) redList.stream().filter(historyRed::contains).count();
             int blueMatch = (int) blueList.stream().filter(historyBlue::contains).count();
 
-            // 如果相似度较高，添加到结果中
             if (redMatch + blueMatch >= Constants.similarSize) {
-                // 格式化日期显示
                 String formattedDate = formatDateDisplay(key);
                 result.put("总共" + (redMatch + blueMatch) + "个相同号码, 红球相同" + redMatch + "个" + (blueMatch > 0 ? ",蓝球相同" + blueMatch + "个" : ""),
-                        formatHistoryNumbers(historyRed, historyBlue) + " (日期: " + formattedDate + ", 期号: " + key + ")");
+                        formatHistoryNumbers(historyRed, historyBlue) + " (日期: " + formattedDate + ")");
             }
         }
         return result;
@@ -428,17 +324,12 @@ public class DreamNumer extends AppBaseNum {
      * 格式化日期显示
      */
     private static String formatDateDisplay(String dateStr) {
-        // 尝试识别常见的日期格式
         if (dateStr.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            // 已经是标准格式 yyyy-MM-dd
             return dateStr;
         } else if (dateStr.matches("\\d{8}")) {
-            // 格式为 yyyyMMdd
             return dateStr.substring(0, 4) + "-" + dateStr.substring(4, 6) + "-" + dateStr.substring(6, 8);
-        } else {
-            // 其他格式或无法识别为日期的情况
-            return dateStr;
         }
+        return dateStr;
     }
 
     /**
@@ -459,7 +350,8 @@ public class DreamNumer extends AppBaseNum {
      */
     public static void comparisonOpenNum(List<Integer> redList, List<Integer> blueList,
                                          int redSize, int blueSize, JSONObject historyData) {
-        // 获取最新的开奖号码
+        if (historyData == null) return;
+
         String latestKey = historyData.keySet().stream()
                 .max(Comparator.naturalOrder())
                 .orElse(null);
@@ -471,7 +363,6 @@ public class DreamNumer extends AppBaseNum {
             List<Integer> openRed = new ArrayList<>();
             List<Integer> openBlue = new ArrayList<>();
 
-            // 分离红球和蓝球
             for (int i = 0; i < parts.length; i++) {
                 int num = Integer.parseInt(parts[i]);
                 if (i < redSize) {
@@ -481,17 +372,14 @@ public class DreamNumer extends AppBaseNum {
                 }
             }
 
-            // 计算匹配数量
             int redMatch = (int) redList.stream().filter(openRed::contains).count();
             int blueMatch = (int) blueList.stream().filter(openBlue::contains).count();
 
-            // 格式化日期显示
             String formattedDate = formatDateDisplay(latestKey);
             
-            // 输出匹配结果
-            System.out.println("上一期开奖号码: " + formatHistoryNumbers(openRed, openBlue) + " (日期: " + formattedDate + ", 期号: " + latestKey + ")");
-            System.out.println("红球匹配: " + redMatch + "个");
-            System.out.println("蓝球匹配: " + blueMatch + "个");
+            System.out.println("\n【与上期开奖号码对比】");
+            System.out.println("上期开奖: " + formatHistoryNumbers(openRed, openBlue) + " (" + formattedDate + ")");
+            System.out.println("红球匹配: " + redMatch + "个, 蓝球匹配: " + blueMatch + "个");
         }
     }
 }

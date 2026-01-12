@@ -33,7 +33,7 @@ public class RunPython {
                 jsonObject = instance.filterJson(Constants.ifRunPath);
                 Boolean flag = jsonObject.getBoolean(date);
                 if (flag != null && flag) {
-                    System.out.println("今天已经执行过python脚本了不再执行脚本。");
+                    System.out.println("今天已经执行过python脚本了不再执行爬数脚本。");
                     return;
                 }
             }
