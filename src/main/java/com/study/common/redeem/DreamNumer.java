@@ -78,6 +78,56 @@ public class DreamNumer extends AppBaseNum {
         return "";
     }
 
+    /**
+     * 静默生成号码并返回（不需要用户交互，用于自动推送）
+     * @return 生成的号码字符串，格式如 "01,05,11,22,28,32 08"
+     */
+    public static String generateAndReturnNumber() {
+        String zjType = getZjType();
+        if (StrUtil.isEmpty(zjType)) {
+            return null;
+        }
+        return generateAndReturnNumber(zjType);
+    }
+
+    /**
+     * 指定类型静默生成号码并返回
+     * @param zjType tc=大乐透, fc=双色球
+     * @return 生成的号码字符串
+     */
+    public static String generateAndReturnNumber(String zjType) {
+        LotteryType type = LotteryType.fromCode(zjType);
+        if (type == null) {
+            return null;
+        }
+
+        String jsonFilePath = "tc".equals(type.code) ? Constants.getTcFilePath() : Constants.getFcFilePath();
+        JSONObject historyData = filterJson(jsonFilePath);
+
+        // 最多尝试10次生成不重复的号码
+        for (int attempt = 0; attempt < 10; attempt++) {
+            Set<Integer> redNumbers = generateSmartRedNumbers(type);
+            Set<Integer> blueNumbers = generateNumbers(1, type.maxBlue, type.blueCount);
+            
+            String formattedNumbers = formatLotteryNumbers(redNumbers, blueNumbers);
+            
+            // 检查是否与历史重复
+            if (!isNumberExists(formattedNumbers, historyData)) {
+                String displayNumbers = formatDisplayNumbers(redNumbers, blueNumbers);
+                // 写入历史记录
+                WriteNum.writeMyNumber(displayNumbers);
+                return displayNumbers;
+            }
+        }
+        
+        // 10次都重复，强制返回最后一次
+        Set<Integer> redNumbers = generateSmartRedNumbers(type);
+        Set<Integer> blueNumbers = generateNumbers(1, type.maxBlue, type.blueCount);
+        String displayNumbers = formatDisplayNumbers(redNumbers, blueNumbers);
+        WriteNum.writeMyNumber(displayNumbers);
+        return displayNumbers;
+    }
+
     // ==================== 智能号码生成 ====================
 
     /**
