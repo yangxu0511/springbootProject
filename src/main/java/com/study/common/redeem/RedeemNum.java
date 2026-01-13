@@ -410,4 +410,206 @@ public class RedeemNum extends AppBaseNum {
             System.out.println(prize);
         }
     }
+
+    // ==================== 带微信推送的兑奖方法 ====================
+
+    /**
+     * 兑奖并推送结果到微信
+     * @param params 日期参数，为空则使用昨天日期
+     * @return 兑奖结果摘要
+     */
+    public static RedeemResult redeemWithPush(String params) {
+        RunPython.run();
+
+        RedeemResult redeemResult = new RedeemResult();
+
+        // 初始化彩票上下文
+        LotteryContext context = initializeLotteryContext(params);
+        if (!context.isValid()) {
+            redeemResult.setError("无效的彩票上下文");
+            return redeemResult;
+        }
+
+        redeemResult.setLotteryType(context.getLotteryType());
+        redeemResult.setOpenDate(context.getOpenDate());
+        redeemResult.setBuyDate(context.getBuyDate());
+
+        // 处理开奖号码
+        JSONObject openData = filterJson(context.getFilePath());
+        String openNumber = openData.getString(context.getOpenDate());
+
+        if (StrUtil.isEmpty(openNumber)) {
+            redeemResult.setError("未获取到当天的中奖号码");
+            return redeemResult;
+        }
+
+        redeemResult.setWinningNumber(openNumber);
+        parseWinningNumbers(context, openNumber);
+
+        // 处理已购买号码（当天）
+        JSONObject hisJson = filterJson(Constants.getHisFilePath());
+        String boughtNumbers = hisJson.getString(context.getBuyDate());
+
+        if (StrUtil.isEmpty(boughtNumbers)) {
+            redeemResult.setNoPurchase(true);
+        } else {
+            processNumberSetWithResult(context, boughtNumbers, redeemResult);
+        }
+
+        // 处理历史号码中大奖检查
+        processHistoricalNumbersWithResult(context, hisJson, redeemResult);
+
+        return redeemResult;
+    }
+
+    /**
+     * 处理历史号码并收集中大奖信息
+     */
+    private static void processHistoricalNumbersWithResult(LotteryContext context, JSONObject hisJson, RedeemResult redeemResult) {
+        for (String date : hisJson.keySet()) {
+            // 跳过当天购买的号码（已经在上面处理过了）
+            if (date.equals(context.getBuyDate())) {
+                continue;
+            }
+
+            String numbers = hisJson.getString(date);
+            for (String number : numbers.split("\\|")) {
+                if (!isValidNumberFormat(number, context.getBlueSize())) {
+                    continue;
+                }
+
+                MatchResult matchResult = calculateMatchResult(context, number);
+                String prize = getPrizeInfo(context.getLotteryType(), matchResult);
+
+                // 只收集中奖的历史号码（红球>=4个 或 有奖项）
+                if (prize != null || matchResult.getRedCount() >= Constants.sameRedSize) {
+                    RedeemResult.HistoricalWin hw = new RedeemResult.HistoricalWin();
+                    hw.setDate(date);
+                    hw.setNumber(number);
+                    hw.setRedMatch(matchResult.getRedCount());
+                    hw.setBlueMatch(matchResult.getBlueCount());
+                    hw.setPrize(prize);
+                    hw.setWon(prize != null);
+                    redeemResult.addHistoricalWin(hw);
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理号码集合并收集结果
+     */
+    private static void processNumberSetWithResult(LotteryContext context, String numbers, RedeemResult redeemResult) {
+        String[] numberArray = numbers.split("\\|");
+
+        for (String number : numberArray) {
+            if (!isValidNumberFormat(number, context.getBlueSize())) {
+                continue;
+            }
+
+            MatchResult matchResult = calculateMatchResult(context, number);
+            String prize = getPrizeInfo(context.getLotteryType(), matchResult);
+
+            RedeemResult.NumberResult nr = new RedeemResult.NumberResult();
+            nr.setNumber(number);
+            nr.setRedMatch(matchResult.getRedCount());
+            nr.setBlueMatch(matchResult.getBlueCount());
+            nr.setPrize(prize);
+            nr.setWon(prize != null);
+
+            redeemResult.addNumberResult(nr);
+        }
+    }
+
+    /**
+     * 兑奖结果类
+     */
+    public static class RedeemResult {
+        private String lotteryType;
+        private String openDate;
+        private String buyDate;
+        private String winningNumber;
+        private String error;
+        private boolean noPurchase = false;
+        private List<NumberResult> numberResults = new ArrayList<>();
+        private List<HistoricalWin> historicalWins = new ArrayList<>();
+
+        public boolean hasWinning() {
+            return numberResults.stream().anyMatch(NumberResult::isWon);
+        }
+
+        public boolean hasHistoricalWinning() {
+            return historicalWins.stream().anyMatch(HistoricalWin::isWon);
+        }
+
+        public String getLotteryTypeName() {
+            return "tc".equals(lotteryType) ? "大乐透" : "双色球";
+        }
+
+        // Getters and Setters
+        public String getLotteryType() { return lotteryType; }
+        public void setLotteryType(String lotteryType) { this.lotteryType = lotteryType; }
+        public String getOpenDate() { return openDate; }
+        public void setOpenDate(String openDate) { this.openDate = openDate; }
+        public String getBuyDate() { return buyDate; }
+        public void setBuyDate(String buyDate) { this.buyDate = buyDate; }
+        public String getWinningNumber() { return winningNumber; }
+        public void setWinningNumber(String winningNumber) { this.winningNumber = winningNumber; }
+        public String getError() { return error; }
+        public void setError(String error) { this.error = error; }
+        public boolean isNoPurchase() { return noPurchase; }
+        public void setNoPurchase(boolean noPurchase) { this.noPurchase = noPurchase; }
+        public List<NumberResult> getNumberResults() { return numberResults; }
+        public void addNumberResult(NumberResult nr) { this.numberResults.add(nr); }
+        public List<HistoricalWin> getHistoricalWins() { return historicalWins; }
+        public void addHistoricalWin(HistoricalWin hw) { this.historicalWins.add(hw); }
+
+        /**
+         * 单注号码结果
+         */
+        public static class NumberResult {
+            private String number;
+            private int redMatch;
+            private int blueMatch;
+            private String prize;
+            private boolean won;
+
+            public String getNumber() { return number; }
+            public void setNumber(String number) { this.number = number; }
+            public int getRedMatch() { return redMatch; }
+            public void setRedMatch(int redMatch) { this.redMatch = redMatch; }
+            public int getBlueMatch() { return blueMatch; }
+            public void setBlueMatch(int blueMatch) { this.blueMatch = blueMatch; }
+            public String getPrize() { return prize; }
+            public void setPrize(String prize) { this.prize = prize; }
+            public boolean isWon() { return won; }
+            public void setWon(boolean won) { this.won = won; }
+        }
+
+        /**
+         * 历史号码中奖信息
+         */
+        public static class HistoricalWin {
+            private String date;
+            private String number;
+            private int redMatch;
+            private int blueMatch;
+            private String prize;
+            private boolean won;
+
+            public String getDate() { return date; }
+            public void setDate(String date) { this.date = date; }
+            public String getNumber() { return number; }
+            public void setNumber(String number) { this.number = number; }
+            public int getRedMatch() { return redMatch; }
+            public void setRedMatch(int redMatch) { this.redMatch = redMatch; }
+            public int getBlueMatch() { return blueMatch; }
+            public void setBlueMatch(int blueMatch) { this.blueMatch = blueMatch; }
+            public String getPrize() { return prize; }
+            public void setPrize(String prize) { this.prize = prize; }
+            public boolean isWon() { return won; }
+            public void setWon(boolean won) { this.won = won; }
+        }
+    }
 }
+

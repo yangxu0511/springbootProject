@@ -7,7 +7,7 @@ public class AppbaseController {
     public static void main(String[] args) {
         //获取每天的号码 命运的齿轮开始转动
         //体彩截止时间晚上9点  福彩截止时间晚上8
-       getToday();
+//       getToday();
         //获取号码
 //		action("2","fc");
 //        //写入号码 购买日期默认为昨天的日期 1当天 2昨天
@@ -26,7 +26,7 @@ public class AppbaseController {
 //      action("5");
 
         //		自动兑奖
-//        action("3");
+        action("3");
         //指定日期兑奖=T-1 如果日期是周六=T-2
 //		action("3","2026-01-12");
 

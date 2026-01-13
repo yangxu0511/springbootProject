@@ -64,40 +64,9 @@ public class TestMain {
 
 
     public static void main(String[] args) throws Exception {
-        String text = "无在网要求1个是爱人是的";
-        String[] patterns = new String[5];
-        patterns[0] = "无在网要求";
-        patterns[1] = ".*要求";
 
-
-        for (String pattern : patterns) {
-            if (StringUtils.isBlank(pattern)) {
-                continue;
-            }
-
-            try {
-                if (pattern.contains("*")) {
-                    String regex = pattern.replace("*", ".*");                    // 包含 *：使用正则包含匹配 (find)
-                    // 注意：这里的正则就是 pattern 本身，不需要像您原方法中那样额外加 [1-9][0-9]*，
-                    // 因为这里配的值如 ".*个月" 已经包含了匹配逻辑。
-
-                    Pattern compiledPattern = Pattern.compile(pattern);
-                    Matcher matcher = compiledPattern.matcher(text);
-
-                    if (matcher.find()) {
-                        System.out.println("true"+pattern);
-                    }
-                } else {
-                    // 不包含 *：要求完全等于 (equals)
-                    if (text.trim().equals(pattern.trim())) {
-                        System.out.println("true");
-
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        double smsReportRate = Math.round(((double)(368153 - 318700) / 368153) * 10000) / 100.0;
+        System.out.println(smsReportRate);
 
     }
 
