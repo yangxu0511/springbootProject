@@ -83,7 +83,7 @@ public class DailyRedeemTask {
                 // 添加历史中奖信息
                 appendHistoricalWins(content, result);
                 
-                if (hasWinning || hasHistoricalWinning) {
+                if (hasWinning ) {
                     content.append("---\n");
                     content.append("🎊 **恭喜发财！记得去兑奖！**");
                 } else {
