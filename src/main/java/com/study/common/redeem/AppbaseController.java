@@ -26,9 +26,9 @@ public class AppbaseController {
 //      action("5");
 
         //		自动兑奖
-        action("3");
+//        action("3");
         //指定日期兑奖=T-1 如果日期是周六=T-2
-//		action("3","2026-01-12");
+		action("3","2026-01-25");
 
     }
 

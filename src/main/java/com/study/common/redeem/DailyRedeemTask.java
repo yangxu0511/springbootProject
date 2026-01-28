@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * 1. 运行此类的 main 方法执行兑奖比对并推送结果到微信
  * 2. 配合 Windows 任务计划程序每天早上 9:30 执行
  * 
- * @author yangxu
+ * @author yangxu   
  * @since 2026/01/13
  */
 public class DailyRedeemTask {

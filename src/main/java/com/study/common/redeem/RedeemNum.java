@@ -463,7 +463,7 @@ public class RedeemNum extends AppBaseNum {
     }
 
     /**
-     * 处理历史号码并收集中大奖信息
+     * 处理历史号码并收集中大奖信息（只收集4等奖以上）
      */
     private static void processHistoricalNumbersWithResult(LotteryContext context, JSONObject hisJson, RedeemResult redeemResult) {
         for (String date : hisJson.keySet()) {
@@ -481,18 +481,36 @@ public class RedeemNum extends AppBaseNum {
                 MatchResult matchResult = calculateMatchResult(context, number);
                 String prize = getPrizeInfo(context.getLotteryType(), matchResult);
 
-                // 只收集中奖的历史号码（红球>=4个 或 有奖项）
-                if (prize != null || matchResult.getRedCount() >= Constants.sameRedSize) {
+                // 只收集4等奖以上的历史号码
+                if (prize != null && isFourthPrizeOrAbove(context.getLotteryType(), matchResult)) {
                     RedeemResult.HistoricalWin hw = new RedeemResult.HistoricalWin();
                     hw.setDate(date);
                     hw.setNumber(number);
                     hw.setRedMatch(matchResult.getRedCount());
                     hw.setBlueMatch(matchResult.getBlueCount());
                     hw.setPrize(prize);
-                    hw.setWon(prize != null);
+                    hw.setWon(true);
                     redeemResult.addHistoricalWin(hw);
                 }
             }
+        }
+    }
+
+    /**
+     * 判断是否为4等奖以上
+     * 大乐透: 一等奖(5-2), 二等奖(5-1), 三等奖(5-0), 四等奖(4-2)
+     * 双色球: 一等奖(6-1), 二等奖(6-0), 三等奖(5-1), 四等奖(5-0, 4-1)
+     */
+    private static boolean isFourthPrizeOrAbove(String lotteryType, MatchResult result) {
+        int red = result.getRedCount();
+        int blue = result.getBlueCount();
+        
+        if ("tc".equals(lotteryType)) {
+            // 大乐透4等奖以上: 5-2, 5-1, 5-0, 4-2
+            return (red == 5) || (red == 4 && blue == 2);
+        } else {
+            // 双色球4等奖以上: 6-1, 6-0, 5-1, 5-0, 4-1
+            return (red >= 5) || (red == 4 && blue == 1);
         }
     }
 
