@@ -7,6 +7,9 @@ package com.study.common.thread;
  * @Company 广州云趣信息科技有限公司
  */
 
+import cn.hutool.core.util.RandomUtil;
+import org.easitline.common.utils.kit.RandomKit;
+
 import java.io.IOException;
 
 /**
@@ -20,7 +23,19 @@ public class TestMain {
 
 
     public static void main(String[] args) throws Exception {
-
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
+        System.out.println(RandomKit.uniqueStr());
 
     }
 
