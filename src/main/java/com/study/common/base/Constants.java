@@ -14,23 +14,23 @@ import java.util.Map;
  */
 
 public class Constants {
-    private static final String basePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources";
-    private static final String hisFilePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\history.json";
-    private static final String notBuyPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\notBuy.json";
-    private static final String tcFilePath = "D:\\idea-workspace\\springbootProject\\dlt.json";
-    private static final String tcBakFilePath = "D:\\idea-workspace\\springbootProject\\dlt_bak.json";
-    private static final String fcFilePath = "D:\\idea-workspace\\springbootProject\\ssq.json";
-    private static final String fcBakFilePath = "D:\\idea-workspace\\springbootProject\\ssq_bak.json";
+    private static final String basePath = "D:\\workspace\\springbootProject\\src\\main\\resources";
+    private static final String hisFilePath = "D:\\workspace\\springbootProject\\src\\main\\resources\\history.json";
+    private static final String notBuyPath = "D:\\workspace\\springbootProject\\src\\main\\resources\\notBuy.json";
+    private static final String tcFilePath = "D:\\workspace\\springbootProject\\dlt.json";
+    private static final String tcBakFilePath = "D:\\workspace\\springbootProject\\dlt_bak.json";
+    private static final String fcFilePath = "D:\\workspace\\springbootProject\\ssq.json";
+    private static final String fcBakFilePath = "D:\\workspace\\springbootProject\\ssq_bak.json";
 
-    private static final String hisOutFilePath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\history_sort.json";
-    private static final String notBuyOutPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\notBuy_sort.json";
-    private static final String tcFileOutPath = "D:\\idea-workspace\\springbootProject\\\\dlt_sort.json";
-    private static final String fcFileOutPath = "D:\\idea-workspace\\springbootProject\\ssq_sort.json";
+    private static final String hisOutFilePath = "D:\\workspace\\springbootProject\\src\\main\\resources\\history_sort.json";
+    private static final String notBuyOutPath = "D:\\workspace\\springbootProject\\src\\main\\resources\\notBuy_sort.json";
+    private static final String tcFileOutPath = "D:\\workspace\\springbootProject\\\\dlt_sort.json";
+    private static final String fcFileOutPath = "D:\\workspace\\springbootProject\\ssq_sort.json";
 
 
-    public static final String pythonScriptPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\zj.py";
-    public static final String pythonexe = "C:\\Users\\yangxu\\AppData\\Local\\Programs\\Python\\Python38\\python.exe";
-    public static final String ifRunPath = "D:\\idea-workspace\\springbootProject\\src\\main\\resources\\runPython.json";
+    public static final String pythonScriptPath = "D:\\workspace\\springbootProject\\src\\main\\resources\\zj.py";
+    public static final String pythonexe = "C:\\Program Files (x86)\\Python38\\python.exe";
+    public static final String ifRunPath = "D:\\workspace\\springbootProject\\src\\main\\resources\\runPython.json";
     public static final int similarSize = 5; //定义相似度个数
     public static final int sameRedSize = 4; //定义红球命中个数
     public static final int sameHisSize = 4; //历史命中数
